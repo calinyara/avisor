@@ -28,7 +28,7 @@ make
 cd ../../
 cp guests/lrtos/lrtos.bin ./bin
 cp guests/echo/echo.bin ./bin
-cp ./misc/uboot ./bin/uboot.bin
+cp guests/uboot/uboot.bin ./bin
 sudo modprobe nbd max_part=8
 ./scripts/create_sd.sh ./bin/avisor.img ./bin/lrtos.bin ./bin/echo.bin ./bin/uboot.bin
 
