@@ -52,10 +52,10 @@ struct bcm2837_state {
 		uint32_t c1;
 		uint32_t c2;
 		uint32_t c3;
-		uint32_t c0_expire;
-		uint32_t c1_expire;
-		uint32_t c2_expire;
-		uint32_t c3_expire;
+		uint64_t c0_64;
+		uint64_t c1_64;
+		uint64_t c2_64;
+		uint64_t c3_64;
 	} systimer;
 };
 
@@ -349,13 +349,27 @@ unsigned long handle_systimer_read(struct task_struct *tsk, unsigned long addr)
 	return 0;
 }
 
+static uint64_t calc_stc_64(struct task_struct *tsk, uint64_t val)
+{
+	struct bcm2837_state *s = (struct bcm2837_state *)tsk->board_data;
+	uint32_t current_clo = handle_systimer_read(tsk, TIMER_CLO);
+	uint64_t stc;
+
+	if (val > current_clo) {
+		stc = (TO_VIRTUAL_COUNT(s, get_physical_timer_count()) &
+			0xffffffff00000000) + val;
+	} else {
+		stc = (TO_VIRTUAL_COUNT(s, get_physical_timer_count()) &
+			0xffffffff00000000) + val + 0x100000000;
+	}
+
+	return stc;
+}
+
 void handle_systimer_write(struct task_struct *tsk, unsigned long addr,
 			   unsigned long val)
 {
 	struct bcm2837_state *s = (struct bcm2837_state *)tsk->board_data;
-	uint32_t current_clo = handle_systimer_read(tsk, TIMER_CLO);
-	const uint32_t min_expire =
-		10000; // if this value is too short, CLO exceeds this value (timing problem)
 
 	switch (addr) {
 	case TIMER_CS:
@@ -363,23 +377,19 @@ void handle_systimer_write(struct task_struct *tsk, unsigned long addr,
 		break;
 	case TIMER_C0:
 		s->systimer.c0 = val;
-		s->systimer.c0_expire = MAX(
-			val > current_clo ? val - current_clo : 1, min_expire);
+		s->systimer.c0_64 = calc_stc_64(tsk, val);
 		break;
 	case TIMER_C1:
 		s->systimer.c1 = val;
-		s->systimer.c1_expire = MAX(
-			val > current_clo ? val - current_clo : 1, min_expire);
+		s->systimer.c1_64 = calc_stc_64(tsk, val);
 		break;
 	case TIMER_C2:
 		s->systimer.c2 = val;
-		s->systimer.c2_expire = MAX(
-			val > current_clo ? val - current_clo : 1, min_expire);
+		s->systimer.c2_64 = calc_stc_64(tsk, val);
 		break;
 	case TIMER_C3:
 		s->systimer.c3 = val;
-		s->systimer.c3_expire = MAX(
-			val > current_clo ? val - current_clo : 1, min_expire);
+		s->systimer.c3_64 = calc_stc_64(tsk, val);
 		break;
 	}
 }
@@ -426,27 +436,27 @@ void bcm2837_mmio_write(struct task_struct *tsk, unsigned long addr,
 	} else if (is_mbox_addr(addr)) {
 		handle_mbox_write(tsk, addr, val);
 	}
-
-	// WARN("addr=0x%lx, val=0x%lx\n", addr, val);
 }
 
-static int check_expiration(uint32_t *expire, uint64_t lapse)
+static int check_expiration(uint64_t stc64, uint64_t cvt)
 {
-	if (*expire == 0)
-		return 0;
-
-	if (lapse >= *expire) {
-		*expire = 0;
+	/* It's the time, if the current virtual time goes beyond 
+	 * the system timer compare.
+	 */
+	if (cvt >= stc64)
 		return 1;
-	} else {
-		*expire -= lapse;
+	else
 		return 0;
-	}
 }
 
 void bcm2837_entering_vm(struct task_struct *tsk)
 {
 	struct bcm2837_state *s = (struct bcm2837_state *)tsk->board_data;
+	uint64_t current_virtual_count;
+	uint64_t c0x;
+	uint64_t c1x;
+	uint64_t c2x;
+	uint64_t c3x;
 
 	// update systimer's offset
 	unsigned long current_physical_count = get_physical_timer_count();
@@ -454,22 +464,28 @@ void bcm2837_entering_vm(struct task_struct *tsk)
 		current_physical_count - s->systimer.last_physical_count;
 	s->systimer.offset += lapse;
 
+	current_virtual_count = TO_VIRTUAL_COUNT(s, get_physical_timer_count());
+
 	// update cs register
-	int matched = (check_expiration(&s->systimer.c0_expire, lapse)) |
-		      (check_expiration(&s->systimer.c1_expire, lapse) << 1) |
-		      (check_expiration(&s->systimer.c2_expire, lapse) << 2) |
-		      (check_expiration(&s->systimer.c3_expire, lapse) << 3);
+	int matched = (check_expiration(s->systimer.c0_64, current_virtual_count)) |
+		      (check_expiration(s->systimer.c1_64, current_virtual_count) << 1) |
+		      (check_expiration(s->systimer.c2_64, current_virtual_count) << 2) |
+		      (check_expiration(s->systimer.c3_64, current_virtual_count) << 3);
 
 	// update (physical) timer compare value for upcoming timer match
 	uint32_t upcoming = 0xffffffff;
-	if (s->systimer.c0_expire && upcoming > s->systimer.c0_expire)
-		upcoming = s->systimer.c0_expire;
-	if (s->systimer.c1_expire && upcoming > s->systimer.c1_expire)
-		upcoming = s->systimer.c1_expire;
-	if (s->systimer.c2_expire && upcoming > s->systimer.c2_expire)
-		upcoming = s->systimer.c2_expire;
-	if (s->systimer.c3_expire && upcoming > s->systimer.c3_expire)
-		upcoming = s->systimer.c3_expire;
+	c0x = s->systimer.c0_64 - current_virtual_count;
+	c1x = s->systimer.c1_64 - current_virtual_count;
+	c2x = s->systimer.c2_64 - current_virtual_count;
+	c3x = s->systimer.c3_64 - current_virtual_count;
+	if (s->systimer.c0_64 > current_virtual_count && upcoming > c0x)
+		upcoming = (uint32_t)c0x;
+	if (s->systimer.c1_64 > current_virtual_count && upcoming > c1x)
+		upcoming = (uint32_t)c1x;
+	if (s->systimer.c2_64 > current_virtual_count && upcoming > c2x)
+		upcoming = (uint32_t)c2x;
+	if (s->systimer.c3_64 > current_virtual_count && upcoming > c3x)
+		upcoming = (uint32_t)c3x;
 
 	if (upcoming != 0xffffffff)
 		put32(TIMER_C3, get32(TIMER_CLO) + upcoming);
