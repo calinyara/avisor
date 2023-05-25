@@ -11,6 +11,7 @@ GNU_TOOLS ?= aarch64-linux-gnu
 GNU_GCC = $(GNU_TOOLS)-gcc
 GNU_LD = $(GNU_TOOLS)-ld
 GNU_OBJCOPY = $(GNU_TOOLS)-objcopy
+GNU_OBJDUMP = $(GNU_TOOLS)-objdump
 
 INC_DIR = include
 C_OPS = -Wall -nostdlib -nostartfiles -ffreestanding -I$(INC_DIR) -mgeneral-regs-only
@@ -64,6 +65,7 @@ qemu.img: $(LINKER_FILE_QEMU) $(OBJ_FILES)
 	$(GNU_OBJCOPY) $(BUILD_DIR)/kernel8.elf -O binary $(BUILD_DIR)/kernel8.img
 	mkdir -p ./bin
 	cp $(BUILD_DIR)/kernel8.img $(OUTDIR)/kernel8.img
+	$(GNU_OBJDUMP) -D $(BUILD_DIR)/kernel8.elf > $(BUILD_DIR)/kernel8.list
 
 .PHONY: clean
 clean:
