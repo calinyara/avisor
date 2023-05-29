@@ -13,10 +13,11 @@
 
 **控制台操作**
 
-运行上述demo，将在aVisor运行3个虚拟机
+运行上述demo，将在aVisor运行4个虚拟机
 - **echo**:  一个baremetal二进制程序，用以回显键盘输入
 - **lrtos**: 一个微型操作系统，启动后运行两个用户态程序，一个打印“12345”， 另一个打印"abcde", 其内核支持简单调度
 - **uboot**: 标准的 Das U-Boot Bootloader
+- **[FreeRTOS](https://github.com/hacker-jie/freertos-raspi3)**: 该DEMO运行两个Task, 一个打印“12345”, 另一个打印"ABCDE"，由FreeRTOS调度运行 
 
 启动后按回车进入aVisor控制台
 
