@@ -29,8 +29,9 @@ cd ../../
 cp guests/lrtos/lrtos.bin ./bin
 cp guests/echo/echo.bin ./bin
 cp guests/uboot/uboot.bin ./bin
+cp guests/freertos/freertos.bin ./bin
 sudo modprobe nbd max_part=8
-./scripts/create_sd.sh ./bin/avisor.img ./bin/lrtos.bin ./bin/echo.bin ./bin/uboot.bin
+./scripts/create_sd.sh ./bin/avisor.img ./bin/lrtos.bin ./bin/echo.bin ./bin/uboot.bin ./bin/freertos.bin
 
 # Run the Demo
 qemu-system-aarch64 -M raspi3b -nographic -serial null -serial mon:stdio -m 1024 -kernel ./bin/kernel8.img -drive file=./bin/avisor.img,if=sd,format=raw

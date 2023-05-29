@@ -78,6 +78,18 @@ void hypervisor_main()
 		return;
 	}
 
+	struct raw_binary_loader_args bl_args4 = {
+		.load_addr = 0x80000,
+		.entry_point = 0x80000,
+		.sp = 0x0,
+		.filename = "freertos.bin",
+	};
+
+	if (create_task(raw_binary_loader, &bl_args4) < 0) {
+		printf("error while starting task\n");
+		return;
+	}
+
 	while (1) {
 		disable_irq();
 		schedule();
