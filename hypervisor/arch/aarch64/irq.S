@@ -4,7 +4,7 @@
  *
  * A Tiny Hypervisor for IoT Development
  *
- * Copyright (c) 2022 Deng Jie (jiedeng@alumni.sjtu.edu.cn).
+ * Copyright (c) 2022 Deng Jie (mr.dengjie@gmail.com).
  */
 
 .globl irq_vector_init
