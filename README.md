@@ -1,30 +1,31 @@
 # aVisor Hypervisor
 
-**[aVisor](https://github.com/calinyara/avisor)** 是一个可运行在树莓派3上的Hypervisor。用以帮助理解ARM虚拟化的基本概念，学习Hypervisor和操作系统的实现原理。
+**[aVisor](https://github.com/calinyara/avisor)** is a hypervisor that runs on the Raspberry Pi 3. It can be used to help understand the basic concepts of ARM virtualization and learn the principles of hypervisor and operating system.
 
-参考  [**Armv8架构虚拟化介绍**](https://calinyara.github.io/technology/2019/11/03/armv8-virtualization.html)
+<br>
 
-**编译及运行**
-
-```
-./scripts/demo.sh		// 编译并运行demo
-./scripts/clean.sh		// 清理
-```
-
-**控制台操作**
-
-运行上述demo，将在aVisor运行4个虚拟机
-- **[echo](https://github.com/calinyara/avisor/tree/main/guests/echo)**:  一个baremetal二进制程序，用以回显键盘输入
-- **[lrtos](https://github.com/calinyara/avisor/tree/main/guests/lrtos)**: 一个微型操作系统，启动后运行两个用户态程序，一个打印“12345”， 另一个打印"abcde", 其内核支持简单调度
-- **uboot**: 标准的 Das U-Boot Bootloader
-- **[FreeRTOS](https://github.com/hacker-jie/freertos-raspi3)**: 该DEMO运行两个Task, 一个打印“12345”, 另一个打印"ABCDE"，由FreeRTOS调度运行 
-
-启动后按回车进入aVisor控制台
+**Compilation and QEMU Simulation**
 
 ```
-help			// 打印帮助
-vml			// 显示当前虚拟机信息
-vmc <vm id>		// 从Hypervisor控制台切换到VM控制台，例如：vmc 3，切换到uboot控制台
-@+0			// 从VM控制台切换回Hypervisor控制台
+./scripts/demo.sh		// Compile and run the demo
+./scripts/clean.sh		// Clean the project
+```
+
+**Operation In the Console**
+
+The above demo will run 4 Guest VMs on the Hypervisor. After startup, press ***Enter*** to go to the hypervisor's console.
+
+- **[echo](https://github.com/calinyara/avisor/tree/main/guests/echo)**:  A baremetal binary that echoes keyboard input.
+- **[lrtos](https://github.com/calinyara/avisor/tree/main/guests/lrtos)**:  A miniature operating system that runs two user mode processes after startup, one prints "12345" and the other prints "abcde". The lrtos kernel supports the process scheduling.
+- **[uboot](https://github.com/u-boot/u-boot)**: The standard Das U-Boot Bootloader.
+- **[FreeRTOS](https://github.com/hacker-jie/freertos-raspi3)**: The FreeRTOS VM runs two tasks, one prints "12345" and the other prints "ABCDE". The tasks are scheduled by FreeRTOS.
+
+<br>
+
+```
+help			// Print the help
+vml			// Display the current Guest VMs info
+vmc <vm id>		// Switch from the hypervisor's console to a Guest VM's console
+@+0			// Switch back to the hypervisor's console from a Guest VM's console
 ```
 
