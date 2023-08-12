@@ -15,6 +15,7 @@
 #include "common/task.h"
 #include "common/utils.h"
 #include "common/loader.h"
+#include "fs/ff.h"
 #include "shell_priv.h"
 
 #define MAX_STR_SIZE		    256U
@@ -32,6 +33,7 @@ static int32_t shell_cmd_help(__unused int32_t argc, __unused char **argv);
 static int32_t shell_cmd_vml(__unused int32_t argc, __unused char **argv);
 static int32_t shell_cmd_vmc(int32_t argc, char **argv);
 static int32_t shell_cmd_vmld(int32_t argc, char **argv);
+static int32_t shell_cmd_ls(int32_t argc, char **argv);
 
 static struct shell_cmd shell_cmds[] = {
 	{
@@ -57,6 +59,12 @@ static struct shell_cmd shell_cmds[] = {
 		.cmd_param = SHELL_CMD_VMLD_PARAM,
 		.help_str = SHELL_CMD_VMLD_HELP,
 		.fcn = shell_cmd_vmld,
+	},
+	{
+		.str = SHELL_CMD_LS,
+		.cmd_param = SHELL_CMD_LS_PARAM,
+		.help_str = SHELL_CMD_LS_HELP,
+		.fcn = shell_cmd_ls,
 	},
 };
 
@@ -516,6 +524,37 @@ static int32_t shell_cmd_vmld(int32_t argc, char **argv)
 		return -EFAULT;
 	}
 
+	return 0;
+}
+
+static int32_t shell_cmd_ls(int32_t argc, char **argv)
+{
+	DIR dir;
+	FRESULT res;
+	FILINFO fno;
+
+	f_opendir(&dir, "/");
+
+	while(1) {
+  		res = f_readdir(&dir, &fno);
+		if (res != FR_OK || fno.fname[0] == 0)
+			break;
+
+		if (fno.fsize < 1024)
+			printf("%c %3llu B  %s\n", (fno.fattrib & AM_DIR) ? 'd' : '.',
+				fno.fsize, fno.fname);
+		else if (fno.fsize < 1024 * 1024)
+			printf("%c %3llu KB  %s\n", (fno.fattrib & AM_DIR) ? 'd' : '.',
+				fno.fsize / 1024, fno.fname);
+		else if (fno.fsize < 1024 * 1024 * 1024)
+			printf("%c %3llu MB  %s\n", (fno.fattrib & AM_DIR) ? 'd' : '.',
+				fno.fsize / (1024 * 1024), fno.fname);
+		else
+			printf("%c %3llu GB  %s\n", (fno.fattrib & AM_DIR) ? 'd' : '.',
+				fno.fsize / (1024 * 1024 * 1024), fno.fname);
+	}
+
+	f_closedir(&dir);
 	return 0;
 }
 

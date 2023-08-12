@@ -48,8 +48,11 @@ struct shell {
 #define SHELL_CMD_VMC_HELP \
 	"Switch to the VM's console. Use [@0] to return to the aVisor console"
 
-#define SHELL_CMD_VMLD	    "vmld"
+#define SHELL_CMD_VMLD	     "vmld"
 #define SHELL_CMD_VMLD_PARAM "<image file name> <load addr> <entry addr>"
-#define SHELL_CMD_VMLD_HELP \
-	"Load the VM image and run it"
+#define SHELL_CMD_VMLD_HELP  "Load the VM image and run it"
+
+#define SHELL_CMD_LS	     "ls"
+#define SHELL_CMD_LS_PARAM   NULL
+#define SHELL_CMD_LS_HELP    "List files in current folder"
 
