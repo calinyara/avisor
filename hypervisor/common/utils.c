@@ -318,3 +318,61 @@ int64_t strtol_deci(const char *nptr)
 	}
 	return (long)acc;
 }
+
+unsigned long strtoul(const char *str, char **endptr, int base)
+{
+	int auto_detect = 0;
+	if (base == 0 || base == 16) {
+		if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
+			str += 2;
+			auto_detect = 1;
+		}
+	}
+
+	if (auto_detect) {
+		base = 16;
+	}
+
+	unsigned long result = 0;
+	int sign = 1;
+
+	if (str[0] == '+') {
+		str++;
+	} else if (str[0] == '-') {
+		sign = -1;
+		str++;
+	}
+
+	while (*str) {
+		unsigned int digit;
+		char c = *str++;
+
+		if (c >= '0' && c <= '9') {
+			digit = c - '0';
+		} else if (c >= 'a' && c <= 'z') {
+			digit = c - 'a' + 10;
+		} else if (c >= 'A' && c <= 'Z') {
+			digit = c - 'A' + 10;
+		} else {
+			break;
+		}
+
+		if (digit >= base) {
+			break;
+		}
+
+		unsigned long next = result * base + digit;
+		if (next < result) {
+			return ULONG_MAX;
+		}
+
+		result = next;
+	}
+
+	if (endptr) {
+		*endptr = (char *)str;
+	}
+
+	return sign * result;
+}
+

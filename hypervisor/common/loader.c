@@ -55,7 +55,7 @@ int raw_binary_loader(void *arg, struct pt_regs *regs)
 	if (load_file_to_memory(current, loader_args->filename,
 				loader_args->load_addr) < 0)
 		return -1;
-	current->name = loader_args->filename;
+	(void)strncpy(current->name, loader_args->filename, 36);
 
 	regs->pc = loader_args->entry_point;
 	regs->sp = loader_args->sp;

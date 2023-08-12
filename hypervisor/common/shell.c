@@ -14,6 +14,7 @@
 #include "common/printf.h"
 #include "common/task.h"
 #include "common/utils.h"
+#include "common/loader.h"
 #include "shell_priv.h"
 
 #define MAX_STR_SIZE		    256U
@@ -30,6 +31,7 @@
 static int32_t shell_cmd_help(__unused int32_t argc, __unused char **argv);
 static int32_t shell_cmd_vml(__unused int32_t argc, __unused char **argv);
 static int32_t shell_cmd_vmc(int32_t argc, char **argv);
+static int32_t shell_cmd_vmld(int32_t argc, char **argv);
 
 static struct shell_cmd shell_cmds[] = {
 	{
@@ -49,6 +51,12 @@ static struct shell_cmd shell_cmds[] = {
 		.cmd_param = SHELL_CMD_VMC_PARAM,
 		.help_str = SHELL_CMD_VMC_HELP,
 		.fcn = shell_cmd_vmc,
+	},
+	{
+		.str = SHELL_CMD_VMLD,
+		.cmd_param = SHELL_CMD_VMLD_PARAM,
+		.help_str = SHELL_CMD_VMLD_HELP,
+		.fcn = shell_cmd_vmld,
 	},
 };
 
@@ -476,3 +484,38 @@ static int32_t shell_cmd_vmc(int32_t argc, char **argv)
 
 	return CODE_AVOID_SHELL_PROMPT_STR;
 }
+
+struct raw_binary_loader_args bl_args;
+static int32_t shell_cmd_vmld(int32_t argc, char **argv)
+{
+	uint64_t load_addr;
+	uint64_t entry_addr;
+	char *end;
+
+	if (argc != 4)
+		return -EINVAL;
+
+	load_addr = strtoul(argv[2], &end, 16);
+	if (*end) {
+		printf("Error: %s is not a pure hex number!\n", argv[2]);
+		return -EINVAL;
+	}
+
+	entry_addr = strtoul(argv[3], &end, 16);
+	if (*end) {
+		printf("Error: %s is not a pure hex number!\n", argv[3]);
+		return -EINVAL;
+	}
+
+	(void)strncpy(bl_args.filename, argv[1], 36);
+	bl_args.load_addr = load_addr;
+	bl_args.entry_point = entry_addr;
+
+	if (create_task(raw_binary_loader, &bl_args) < 0) {
+		printf("error while starting task\n");
+		return -EFAULT;
+	}
+
+	return 0;
+}
+

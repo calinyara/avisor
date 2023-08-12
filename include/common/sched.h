@@ -149,7 +149,7 @@ struct task_struct {
 	long preempt_count;
 	long pid; // used as VMID
 	unsigned long flags;
-	const char *name;
+	char name[36];
 	const struct board_ops *board_ops;
 	void *board_data;
 	struct mm_struct mm;

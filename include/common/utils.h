@@ -62,3 +62,5 @@ int isspace(int);
 int toupper(int);
 int tolower(int);
 int64_t strtol_deci(const char *nptr);
+unsigned long strtoul(const char *str, char **endptr, int base);
+

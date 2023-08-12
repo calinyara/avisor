@@ -16,7 +16,7 @@ struct raw_binary_loader_args {
 	unsigned long load_addr;
 	unsigned long entry_point;
 	unsigned long sp;
-	const char *filename;
+	char filename[36];
 };
 
 int raw_binary_loader(void *, struct pt_regs *regs);

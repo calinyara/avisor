@@ -83,7 +83,7 @@ int create_task(loader_func_t loader, void *arg)
 	p->priority = current->priority;
 	p->state = TASK_RUNNING;
 	p->counter = p->priority;
-	p->name = "VM";
+	(void)strncpy(p->name, "VM", 36);
 
 	p->board_ops = &bcm2837_board_ops;
 	if (HAVE_FUNC(p->board_ops, initialize))
@@ -120,5 +120,5 @@ void flush_task_console(struct task_struct *tsk)
 
 void init_initial_task()
 {
-	task[0]->name = "HV";
+	(void)strncpy(task[0]->name, "HV", 36);
 }
