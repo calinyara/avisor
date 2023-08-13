@@ -1,6 +1,6 @@
 # aVisor Hypervisor
 
-**[aVisor](https://github.com/calinyara/avisor)**  is a bare-metal hypervisor that runs on the Raspberry Pi 3. It can be used to learn about the basic concepts of ARM virtualization and the principles of hypervisors and operating systems.
+**[aVisor](https://calinyara.github.io/technology/2023/02/25/aVisor-en.html)** is a bare-metal hypervisor that runs on the Raspberry Pi 3. It can be used to learn about the basic concepts of ARM virtualization and the principles of hypervisors and operating systems.
 
 <br>
 
