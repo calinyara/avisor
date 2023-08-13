@@ -26,5 +26,7 @@ help			// 打印帮助
 vml			// 显示当前虚拟机信息
 vmc <vm id>		// 从Hypervisor控制台切换到VM控制台，例如：vmc 3，切换到uboot控制台
 @+0			// 从VM控制台切换回Hypervisor控制台
+ls                      // 显示当前目录下文件(虚拟机镜像文件)
+vmld <images> <load addr> <entry addr>          // 加载一个虚拟机镜像文件并运行
 ```
 

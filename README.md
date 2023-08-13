@@ -27,5 +27,7 @@ help			// Print the help
 vml			// Display the current Guest VMs info
 vmc <vm id>		// Switch from the hypervisor's console to a Guest VM's console
 @+0			// Switch back to the hypervisor's console from a Guest VM's console
+ls			// List all files (VM images)
+vmld <images> <load addr> <entry addr>		// Load a VM image and run it
 ```
 
