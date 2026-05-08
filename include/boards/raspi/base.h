@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * aVisor Hypervisor
+ *
+ * A Tiny Hypervisor for IoT Development
+ *
+ * Copyright (c) 2023 Deng Jie (mr.dengjie@gmail.com).
+ */
+
+#pragma once
+
+#include "common/mm.h"
+
+#define DEVICE_BASE 0x3F000000
+#define PBASE	    (VA_START + DEVICE_BASE)
